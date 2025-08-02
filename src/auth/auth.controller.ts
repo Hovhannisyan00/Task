@@ -6,12 +6,14 @@ import {
   Post,
   Res,
   UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterUserDto } from '../users/dto/register-user.dto';
 import { LoginDto } from '../users/dto/lolgin-user.dto';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -26,7 +28,6 @@ export class AuthController {
     try {
       return await this.authService.signUp(userDto);
     } catch (err) {
-      console.log(err);
       throw new BadRequestException(err.message || 'Something went wrong');
     }
   }
@@ -54,5 +55,19 @@ export class AuthController {
     } catch (err) {
       throw new UnauthorizedException(err.message || 'Something went wrong');
     }
+  }
+
+  @Post('logout')
+  @UseGuards(JwtAuthGuard)
+  signOut(@Res() res: Response) {
+    const nodeEnv = this.configService.get<string>('nodeEnv');
+
+    res.clearCookie('token', {
+      httpOnly: true,
+      secure: nodeEnv === 'production',
+      sameSite: 'strict',
+    });
+
+    return res.status(200).json({ message: 'Successfully logged out' });
   }
 }

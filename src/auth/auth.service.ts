@@ -1,12 +1,9 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { RegisterUserDto } from '../users/dto/register-user.dto';
 import * as bcrypt from 'bcrypt';
-import { UserRepository } from '../repositories/User/UserRepository';
+import { UserRepository } from '../repositories/user/UserRepository';
 import { LoginDto } from '../users/dto/lolgin-user.dto';
-import type {
-  IUser,
-  IUserWithPassword,
-} from '../interfaces/user/IUserInterface';
+import type { IUserWithPassword } from '../interfaces/user/IUserInterface';
 import { JwtService } from '../services/jwt/jwt.service';
 
 @Injectable()
@@ -16,7 +13,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async signUp(data: RegisterUserDto) {
+  async signUp(data: RegisterUserDto): Promise<IUserWithPassword> {
     data.password = await bcrypt.hash(data.password, 10);
     const isExist: boolean = await this.userRepository.checkUserExists(
       data.email,
@@ -46,11 +43,6 @@ export class AuthService {
       email: user.email,
     });
 
-    return { token, user: this.excludePassword(user) };
-  }
-
-  excludePassword(user: IUserWithPassword): IUser {
-    const { password, ...safeUser } = user;
-    return safeUser;
+    return { token, user };
   }
 }

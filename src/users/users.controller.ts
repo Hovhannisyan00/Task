@@ -1,14 +1,21 @@
-import { Body, Controller, Post } from '@nestjs/common';
-import { RegisterUserDto } from './dto/register-user.dto';
+import { Controller, Get, Query } from '@nestjs/common';
 import { UsersService } from './users.service';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post('register')
-  aaa(@Body() userData: RegisterUserDto) {
-    console.log(userData);
-    return this.usersService.registerUser(userData);
+  @Get('search')
+  async search(
+    @Query('firstName') firstName?: string,
+    @Query('lastName') lastName?: string,
+    @Query('age') age?: string,
+  ) {
+    const ageNumber = age ? parseInt(age, 10) : undefined;
+    return await this.usersService.searchUsers({
+      firstName,
+      lastName,
+      age: ageNumber,
+    });
   }
 }

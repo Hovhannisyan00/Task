@@ -1,14 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
-import { RegisterUserDto } from './dto/register-user.dto';
-import { UserRepository } from '../repositories/User/UserRepository';
+import { UserRepository } from '../repositories/user/UserRepository';
+import { ISearchUserParams } from 'src/interfaces/user/IUserSearch';
+import { IUserWithPassword } from 'src/interfaces/user/IUserInterface';
 
 @Injectable()
 export class UsersService {
   constructor(private readonly userRepository: UserRepository) {}
 
-  async registerUser(data: RegisterUserDto) {
-    data.password = await bcrypt.hash(data.password, 10);
-    // return this.userRepository.register(data);
+  async searchUsers(params: ISearchUserParams): Promise<IUserWithPassword[]> {
+    return await this.userRepository.searchUsers(params);
   }
 }
