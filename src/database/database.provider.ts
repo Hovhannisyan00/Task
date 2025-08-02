@@ -1,14 +1,14 @@
 import { Pool } from 'pg';
-import { SERVER_CONFIG } from '../configuration/.env_configurations/env.config';
+import { DB_CONFIG } from '../configuration/.env_configurations/env.config';
 
-const db_name: string = SERVER_CONFIG.DB_NAME;
+const db_name: string = DB_CONFIG.DB_NAME;
 
 const defaultPool = new Pool({
-  host: SERVER_CONFIG.DB_HOST,
-  port: 5432,
-  user: 'postgres',
-  password: 'postgres',
-  database: 'postgres',
+  host: DB_CONFIG.DB_DEFAULT_HOST,
+  port: DB_CONFIG.DB_DEFAULT_PORT,
+  user: DB_CONFIG.DB_DEFAULT_USER_NAME,
+  password: DB_CONFIG.DB_DEFAULT_PASSWORD,
+  database: DB_CONFIG.DB_DEFAULT_NAME,
 });
 
 export let db: Pool;
@@ -30,10 +30,10 @@ export async function initDb() {
     await defaultPool.end();
 
     db = new Pool({
-      host: 'localhost',
-      port: 5432,
-      user: 'postgres',
-      password: 'postgres',
+      host: DB_CONFIG.DB_HOST,
+      port: DB_CONFIG.DB_PORT,
+      user: DB_CONFIG.DB_DEFAULT_NAME,
+      password: DB_CONFIG.DB_PASSWORD,
       database: db_name,
     });
 
