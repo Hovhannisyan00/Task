@@ -1,17 +1,35 @@
-import { Controller } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Request,
+  Body,
+  Param,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+} from '@nestjs/swagger';
 import { FriendsService } from './friends.service';
-import { Post, Get, Request, Body, Param, UseGuards } from '@nestjs/common';
 import { SendFriendRequestDto } from './dto/send-friend-request.dto';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import { IAuthenticatedRequestInterface } from 'src/interfaces/auth/IAuthenticatedRequestInterface';
 import { IUserWithPassword } from 'src/interfaces/user/IUserInterface';
 
+@ApiBearerAuth()
+@ApiTags('Friends')
 @UseGuards(JwtAuthGuard)
 @Controller('friends')
 export class FriendsController {
   constructor(private readonly friendsService: FriendsService) {}
 
   @Post('request')
+  @ApiOperation({ summary: 'Send a friend request' })
+  @ApiResponse({ status: 201, description: 'Request sent' })
   async sendRequest(
     @Request() req: IAuthenticatedRequestInterface,
     @Body() dto: SendFriendRequestDto,
@@ -23,6 +41,8 @@ export class FriendsController {
   }
 
   @Get('requests')
+  @ApiOperation({ summary: 'Get incoming friend requests' })
+  @ApiResponse({ status: 200, type: [Object] })
   async incomingRequests(
     @Request() req: IAuthenticatedRequestInterface,
   ): Promise<IUserWithPassword[]> {
@@ -30,6 +50,8 @@ export class FriendsController {
   }
 
   @Post('accept/:requestId')
+  @ApiOperation({ summary: 'Accept a friend request' })
+  @ApiParam({ name: 'requestId', type: Number })
   async accept(
     @Request() req: IAuthenticatedRequestInterface,
     @Param('requestId') requestId: string,
@@ -38,6 +60,8 @@ export class FriendsController {
   }
 
   @Post('decline/:requestId')
+  @ApiOperation({ summary: 'Decline a friend request' })
+  @ApiParam({ name: 'requestId', type: Number })
   async decline(
     @Request() req: IAuthenticatedRequestInterface,
     @Param('requestId') requestId: string,
@@ -49,6 +73,7 @@ export class FriendsController {
   }
 
   @Get()
+  @ApiOperation({ summary: 'Get list of friends' })
   async getFriends(@Request() req: IAuthenticatedRequestInterface) {
     return await this.friendsService.getFriends(req.user.userId);
   }

@@ -1,10 +1,15 @@
 import { RegisterUserDto } from '../users/dto/register-user.dto';
 import * as bcrypt from 'bcrypt';
 import { UserRepository } from '../../repositories/user/UserRepository';
-import { LoginDto } from '../users/dto/lolgin-user.dto';
+import { LoginDto } from '../users/dto/login-user.dto';
 import type { IUserWithPassword } from '../../interfaces/user/IUserInterface';
 import { JwtService } from '../../services/jwt/jwt.service';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { IAuthenticatedRequestInterface } from 'src/interfaces/auth/IAuthenticatedRequestInterface';
 
 @Injectable()
 export class AuthService {
@@ -24,9 +29,11 @@ export class AuthService {
     throw new BadRequestException('User already exists');
   }
 
-  async signIn(
-    loginData: LoginDto,
-  ): Promise<{ token: string; user: IUserWithPassword }> {
+  async signIn(loginData: LoginDto): Promise<{
+    accessToken: string;
+    refreshToken: string;
+    user: IUserWithPassword;
+  }> {
     const user = (await this.userRepository.findByEmail(
       loginData.email,
     )) as IUserWithPassword;
@@ -41,7 +48,12 @@ export class AuthService {
       throw new BadRequestException('Password is invalid');
     }
 
-    const token = this.jwtService.generateToken({
+    const accessToken = this.jwtService.generateAccessToken({
+      id: user.id,
+      email: user.email,
+    });
+
+    const refreshToken = this.jwtService.generateRefreshToken({
       id: user.id,
       email: user.email,
     });
@@ -49,6 +61,31 @@ export class AuthService {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...userWithoutPassword } = user;
 
-    return { token, user: userWithoutPassword as IUserWithPassword };
+    return {
+      accessToken,
+      refreshToken,
+      user: userWithoutPassword as IUserWithPassword,
+    };
+  }
+
+  createToken(req: IAuthenticatedRequestInterface): { accessToken: string } {
+    const refreshToken = req.headers?.['refreshtoken'] as string;
+
+    if (!refreshToken) {
+      throw new UnauthorizedException('Refresh token not found in headers');
+    }
+
+    const payload = this.jwtService.verifyRefreshToken(refreshToken);
+
+    if (!payload) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
+    const accessToken = this.jwtService.generateAccessToken({
+      id: payload.id,
+      email: payload.email,
+    });
+
+    return { accessToken };
   }
 }

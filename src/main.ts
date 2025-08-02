@@ -3,6 +3,7 @@ import { AppModule } from './app/app.module';
 import { SERVER_CONFIG } from './configuration/.env_configurations/env.config';
 import { initDb } from './database/database.provider';
 import { ValidationPipe } from '@nestjs/common';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap(): Promise<void> {
   await initDb();
@@ -24,6 +25,16 @@ async function bootstrap(): Promise<void> {
       forbidNonWhitelisted: true,
     }),
   );
+
+  const config = new DocumentBuilder()
+    .setTitle('My App API')
+    .setDescription('API documentation for registration and more')
+    .setVersion('1.0')
+    .addTag('users')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
 
   await app.listen(PORT ?? 3000);
 

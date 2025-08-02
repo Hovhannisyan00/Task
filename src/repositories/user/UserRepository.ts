@@ -1,46 +1,41 @@
 import { Injectable } from '@nestjs/common';
 import { RegisterUserDto } from '../../modules/users/dto/register-user.dto';
-import { db } from '../../database/database.provider';
 import { IUser, IUserWithPassword } from 'src/interfaces/user/IUserInterface';
 import { ISearchUserParams } from 'src/interfaces/user/IUserSearch';
 import { IUserRepository } from 'src/interfaces/repo/user-repo/IUserRepositoryInterface';
+import { DatabaseService } from 'src/database/database.service';
 
 @Injectable()
 export class UserRepository implements IUserRepository {
+  constructor(private readonly db: DatabaseService) {}
+
   async createUser(dto: RegisterUserDto) {
-    const result = await db.query(
+    const rows = await this.db.query<IUserWithPassword>(
       `INSERT INTO users (first_name, last_name, email, age, password)
-       VALUES ($1, $2, $3, $4, $5) RETURNING id, first_name, last_name, email, age`,
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING id, first_name, last_name, email, age`,
       [dto.first_name, dto.last_name, dto.email, dto.age, dto.password],
     );
-    return result.rows[0] as IUserWithPassword;
+    return rows[0];
   }
 
   async checkUserExists(email: string): Promise<boolean> {
-    const result = await db.query(
-      `SELECT id FROM users
-       WHERE email = $1`,
-      [email],
-    );
-    return (result.rowCount ?? 0) > 0;
+    return await this.db.exists(`SELECT 1 FROM users WHERE email = $1`, [
+      email,
+    ]);
   }
 
-  async findByEmail(email: string): Promise<IUser> {
-    const result = await db.query<IUser>(
+  async findByEmail(email: string): Promise<IUser | null> {
+    return await this.db.queryOne<IUser>(
       `SELECT * FROM users WHERE email = $1`,
       [email],
     );
-    return result.rows[0] || null;
   }
 
   async searchUsers(params: ISearchUserParams): Promise<IUserWithPassword[]> {
     const { firstName, lastName, age } = params;
 
-    let sql = `
-      SELECT id, first_name, last_name, age, email 
-      FROM users 
-      WHERE 1=1
-    `;
+    let sql = `SELECT id, first_name, last_name, age, email FROM users WHERE 1=1`;
     const values: any[] = [];
 
     if (firstName) {
@@ -58,8 +53,6 @@ export class UserRepository implements IUserRepository {
       values.push(age);
     }
 
-    const result = await db.query(sql, values);
-
-    return result.rows as IUserWithPassword[];
+    return await this.db.query<IUserWithPassword>(sql, values);
   }
 }

@@ -3,9 +3,8 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from '../modules/auth/auth.module';
 import { UsersModule } from '../modules/users/users.module';
 import { PassportModule } from '@nestjs/passport';
-import { JwtModule } from '@nestjs/jwt';
-import { SERVER_CONFIG } from '../configuration/.env_configurations/env.config';
 import { FriendsModule } from 'src/modules/friends/friends.module';
+import { DatabaseService } from 'src/database/database.service';
 
 @Module({
   imports: [
@@ -16,12 +15,8 @@ import { FriendsModule } from 'src/modules/friends/friends.module';
     UsersModule,
     PassportModule,
     FriendsModule,
-    JwtModule.register({
-      secret: String(SERVER_CONFIG.JWT_SECRET),
-      signOptions: { expiresIn: '1d' },
-    }),
   ],
   controllers: [],
-  providers: [],
+  providers: [DatabaseService],
 })
 export class AppModule {}
