@@ -5,6 +5,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { initDb } from './database/database.provider';
 
 async function bootstrap() {
+  await initDb();
   const app = await NestFactory.create(AppModule, { cors: true });
   const PORT: number = SERVER_CONFIG.APP_PORT || 3000;
 
@@ -16,7 +17,6 @@ async function bootstrap() {
     }),
   );
 
-  await initDb();
   await app.listen(PORT ?? 3000);
 
   console.log(`Server is running at http://localhost:${PORT}`);

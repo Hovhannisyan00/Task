@@ -1,13 +1,5 @@
 import { RegisterUserDto } from 'src/users/dto/register-user.dto';
-
-export interface IUser {
-  id: number;
-  first_name: string;
-  last_name: string;
-  email: string;
-  age: number;
-  created_at: Date;
-}
+import { IUser } from './IUserInterface';
 
 export interface IUserRepository {
   register(user: RegisterUserDto): Promise<IUser>;

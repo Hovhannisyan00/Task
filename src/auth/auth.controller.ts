@@ -11,6 +11,7 @@ import { AuthService } from './auth.service';
 import { RegisterUserDto } from '../users/dto/register-user.dto';
 import { LoginDto } from '../users/dto/lolgin-user.dto';
 import { ConfigService } from '@nestjs/config';
+import { Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -39,7 +40,8 @@ export class AuthController {
     try {
       const { token, user } = await this.authService.signIn(userDto);
 
-      const nodeEnv = this.configService.get('nodeEnv');
+      const nodeEnv =
+        this.configService.get<string>('NODE_ENV') ?? 'development';
 
       res.cookie('token', token, {
         httpOnly: true,

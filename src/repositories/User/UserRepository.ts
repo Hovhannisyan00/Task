@@ -32,4 +32,8 @@ export class UserRepository {
     );
     return result.rows[0] || null;
   }
+
+  async checkUserPassword(email: string, hashPassword: string) {
+    // const result =
+  }
 }
