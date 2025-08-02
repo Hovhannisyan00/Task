@@ -1,10 +1,10 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
 import { RegisterUserDto } from '../users/dto/register-user.dto';
 import * as bcrypt from 'bcrypt';
-import { UserRepository } from '../repositories/user/UserRepository';
+import { UserRepository } from '../../repositories/user/UserRepository';
 import { LoginDto } from '../users/dto/lolgin-user.dto';
-import type { IUserWithPassword } from '../interfaces/user/IUserInterface';
-import { JwtService } from '../services/jwt/jwt.service';
+import type { IUserWithPassword } from '../../interfaces/user/IUserInterface';
+import { JwtService } from '../../services/jwt/jwt.service';
+import { BadRequestException, Injectable } from '@nestjs/common';
 
 @Injectable()
 export class AuthService {
@@ -24,7 +24,9 @@ export class AuthService {
     throw new BadRequestException('User already exists');
   }
 
-  async signIn(loginData: LoginDto) {
+  async signIn(
+    loginData: LoginDto,
+  ): Promise<{ token: string; user: IUserWithPassword }> {
     const user = (await this.userRepository.findByEmail(
       loginData.email,
     )) as IUserWithPassword;
@@ -32,10 +34,11 @@ export class AuthService {
     if (!user) {
       throw new BadRequestException('User does not exist');
     }
+
     const match = await bcrypt.compare(loginData.password, user.password);
 
     if (!match) {
-      throw new BadRequestException('Password is invalide');
+      throw new BadRequestException('Password is invalid');
     }
 
     const token = this.jwtService.generateToken({
@@ -43,6 +46,9 @@ export class AuthService {
       email: user.email,
     });
 
-    return { token, user };
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...userWithoutPassword } = user;
+
+    return { token, user: userWithoutPassword as IUserWithPassword };
   }
 }

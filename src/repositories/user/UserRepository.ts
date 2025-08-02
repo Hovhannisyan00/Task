@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { RegisterUserDto } from '../../users/dto/register-user.dto';
+import { RegisterUserDto } from '../../modules/users/dto/register-user.dto';
 import { db } from '../../database/database.provider';
 import { IUser, IUserWithPassword } from 'src/interfaces/user/IUserInterface';
 import { ISearchUserParams } from 'src/interfaces/user/IUserSearch';
+import { IUserRepository } from 'src/interfaces/repo/user-repo/IUserRepositoryInterface';
 
 @Injectable()
-export class UserRepository {
+export class UserRepository implements IUserRepository {
   async createUser(dto: RegisterUserDto) {
     const result = await db.query(
       `INSERT INTO users (first_name, last_name, email, age, password)

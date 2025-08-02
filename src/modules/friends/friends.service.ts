@@ -53,19 +53,17 @@ export class FriendsService {
   }
 
   async acceptRequest(requestId: number, currentUserId: number) {
-    console.log(1212, requestId, currentUserId);
     const request = await this.repo.findFriendRequestById(
       requestId,
       currentUserId,
     );
-    console.log(1, request);
 
     if (!request) {
       throw new NotFoundException('Friend request not found or not authorized');
     }
-    console.log(121, request);
-    // await this.repo.addFriends(request.receiver_id, request.sender_id);
-    // await this.repo.deleteFriendRequest(requestId);
+
+    await this.repo.addFriends(request.receiver_id, request.sender_id);
+    await this.repo.deleteFriendRequest(requestId);
 
     return { message: 'Friend request accepted' };
   }

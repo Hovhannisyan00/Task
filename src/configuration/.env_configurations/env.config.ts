@@ -8,4 +8,7 @@ export const SERVER_CONFIG = Object.freeze({
     process.env.DATABASE_URL || 'postgres://postgres:postgres@db:5432/test',
   JWT_SECRET: process.env.JWT_SECRET || 'super-secret-key',
   DB_NAME: process.env.DB_NAME || 'test',
+  DB_DEFAULT_PASSWORD: process.env.DB_DEFAULT_PASSWORD,
+  DB_DEFAULT_USER_NAME: process.env.DB_DEFAULT_USER_NAME,
+  DB_DEFAULT_NAME: process.env.DB_DEFAULT_NAME,
 });

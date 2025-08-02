@@ -14,6 +14,7 @@ import { LoginDto } from '../users/dto/lolgin-user.dto';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { IUserWithPassword } from 'src/interfaces/user/IUserInterface';
 
 @Controller('auth')
 export class AuthController {
@@ -37,7 +38,7 @@ export class AuthController {
   async sigIn(
     @Body() userDto: LoginDto,
     @Res({ passthrough: true }) res: Response,
-  ) {
+  ): Promise<IUserWithPassword> {
     try {
       const { token, user } = await this.authService.signIn(userDto);
 

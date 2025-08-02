@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { db } from 'src/database/database.provider';
+import { IFriendsRepository } from 'src/interfaces/repo/frend-repo/IFriendsRepositoryInterface';
 import { IUser, IUserWithPassword } from 'src/interfaces/user/IUserInterface';
 
 @Injectable()
-export class FriendsRepository {
+export class FriendsRepository implements IFriendsRepository {
   async isUserExists(userId: number): Promise<boolean> {
     const result = await db.query(`SELECT id FROM users WHERE id = $1`, [
       userId,
@@ -63,7 +64,9 @@ export class FriendsRepository {
   }
 
   async deleteFriendRequest(requestId: number): Promise<void> {
-    await db.query(`DELETE FROM friend_requests WHERE id = $1`, [requestId]);
+    await db.query(`DELETE FROM friend_requests WHERE sender_id = $1`, [
+      requestId,
+    ]);
   }
 
   async getFriends(userId: number): Promise<IUser[]> {
@@ -89,28 +92,24 @@ export class FriendsRepository {
       `
       SELECT sender_id, receiver_id
       FROM friend_requests
-      WHERE id = $1 AND receiver_id = $2
+      WHERE sender_id = $1 AND receiver_id = $2
       `,
       [requestId, receiverId],
     );
     if (result.rows.length === 0) {
       return null;
     }
-
-    return result.rows[0];
+    return result.rows[0] as { sender_id: number; receiver_id: number };
   }
 
   async deleteFriendRequestByIdAndReceiver(
     requestId: number,
     receiverId: number,
   ): Promise<boolean> {
-    console.log(receiverId, requestId);
     const result = await db.query(
-      `DELETE FROM friend_requests WHERE id = $1 AND receiver_id = $2 RETURNING id`,
+      `DELETE FROM friend_requests WHERE sender_id = $1 AND receiver_id = $2 RETURNING id`,
       [requestId, receiverId],
     );
-    console.log(1212, result);
-
-    return true;
+    return result.rows.length > 0;
   }
 }
