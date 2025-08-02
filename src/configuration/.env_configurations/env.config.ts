@@ -11,4 +11,5 @@ export const SERVER_CONFIG = Object.freeze({
   DB_DEFAULT_PASSWORD: process.env.DB_DEFAULT_PASSWORD,
   DB_DEFAULT_USER_NAME: process.env.DB_DEFAULT_USER_NAME,
   DB_DEFAULT_NAME: process.env.DB_DEFAULT_NAME,
+  DB_HOST: process.env.DB_HOST,
 });

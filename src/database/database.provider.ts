@@ -4,7 +4,7 @@ import { SERVER_CONFIG } from '../configuration/.env_configurations/env.config';
 const db_name: string = SERVER_CONFIG.DB_NAME;
 
 const defaultPool = new Pool({
-  host: 'localhost',
+  host: SERVER_CONFIG.DB_HOST,
   port: 5432,
   user: 'postgres',
   password: 'postgres',
@@ -27,7 +27,7 @@ export async function initDb() {
   await defaultPool.end();
 
   db = new Pool({
-    host: 'localhost',
+    host: 'db',
     port: 5432,
     user: 'postgres',
     password: 'postgres',
